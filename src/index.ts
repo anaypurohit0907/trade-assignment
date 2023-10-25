@@ -1,5 +1,7 @@
-import express from "express";
+
+
 import bodyParser from "body-parser";
+import express from "express";
 
 export const app = express();
 
@@ -122,7 +124,19 @@ app.get("/balance/:userId", (req, res) => {
 })
 
 app.get("/quote", (req, res) => {
-  // TODO: Assignment
+  const side: string = req.body.side;
+  const price: number = req.body.price;
+  const quantity: number = req.body.quantity;
+  const userId: string = req.body.userId;
+
+  const quote = marketorder(side, price, quantity, userId);
+
+  if(quote != 0){
+    res.json({quote})
+  }
+  else{
+    res.json({success:'false'})
+  }
 });
 
 function flipBalance(userId1: string, userId2: string, quantity: number, price: number) {
@@ -174,3 +188,28 @@ function fillOrders(side: string, price: number, quantity: number, userId: strin
   return remainingQuantity;
 }
 
+
+function marketorder(side: string, price: number, quantity: number, userId: string): number {
+  let remainingQuantity = quantity;
+
+    for (let i = asks.length - 1; i >= 0; i--) {
+      if (asks[i].price > price) {
+        continue;
+      }
+      if (asks[i].quantity > remainingQuantity) {
+        //asks[i].quantity -= remainingQuantity;
+       // flipBalance(asks[i].userId, userId, remainingQuantity, asks[i].price);
+        return asks[i].price
+      } else {
+        return 0;
+      }
+    }
+
+
+  return remainingQuantity;
+}
+
+
+app.listen(5000,()=>{
+  console.log('listening....')
+})
